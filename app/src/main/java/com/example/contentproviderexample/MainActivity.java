@@ -4,6 +4,9 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -11,26 +14,49 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.contentproviderexample.databinding.ActivityMainBinding;
+
+import java.util.Objects;
+
 public class MainActivity extends AppCompatActivity {
 
+    private ActivityMainBinding binding;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        View view = binding.getRoot();
+        setContentView(view);
+        onClickShowDetails(binding.btnRetrieve);
+        Objects.requireNonNull(binding.txtName.getEditText()).addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                binding.txtName.setError(null);
+            }
+        });
     }
 
-   /* @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        //InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        //imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
-        return true;
-    }*/
-
     public void onClickAddDetails(View view) {
+        String name = Objects.requireNonNull(binding.txtName.getEditText()).getText().toString();
+        if(TextUtils.isEmpty(name)){
+            binding.txtName.setError("Cannot be Empty!");
+            return;
+        }
         ContentValues values = new ContentValues();
-        values.put(UsersProvider.name, ((EditText) findViewById(R.id.txtName)).getText().toString());
+        values.put(UsersProvider.name, name);
         getContentResolver().insert(UsersProvider.CONTENT_URI, values);
         Toast.makeText(getBaseContext(), "New Record Inserted", Toast.LENGTH_LONG).show();
+        onClickShowDetails(binding.btnRetrieve);
     }
 
     public void onClickShowDetails(View view) {
